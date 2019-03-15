@@ -8,7 +8,7 @@
 
 
 
-bool useRandomReplacement = false;
+bool useRandomReplacement = true;
 
 SetCache::SetCache(unsigned int num_lines, unsigned int assoc)
 {
@@ -129,14 +129,15 @@ void SetCache::insertLine(uint64_t set, uint64_t tag,
 	// 4. insert new key (ie tag) in the map (same as tag at beining of list)
 	// 5. make sure new key points to location of the iterator honestly
 
+	cacheLine newRow, temp;
+	newRow.tag = tag;
+	newRow.state = state;
 	if (useRandomReplacement)
 	{
 		// step 1
 		lruLists[set].push_front(tag);
 
 		// step 2
-
-		
 		std::random_device rd; // obtain a random number from hardware
 		std::mt19937 eng(rd()); // seed the generator
 		std::uniform_int_distribution<> distr(0, lruLists[set].size() -2);
@@ -173,7 +174,6 @@ void SetCache::insertLine(uint64_t set, uint64_t tag,
 	}
 	else
 	{
-
 		// step 1
 		lruLists[set].push_front(tag);
 
@@ -187,6 +187,14 @@ void SetCache::insertLine(uint64_t set, uint64_t tag,
 		// step 4 and step 5
 		// list.begin() returns iterator to front element (which is what we want)
 		lruMaps[set].insert(make_pair(tag, lruLists[set].begin()));
+
+
+
+		temp.tag = key;
+		
+		// update sets
+		sets[set].erase(temp);
+		sets[set].insert(newRow);
 
 	}
 	
