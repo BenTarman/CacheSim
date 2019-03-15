@@ -8,6 +8,7 @@
 
 
 
+//parameter to use random replacement or not
 bool useRandomReplacement = true;
 
 SetCache::SetCache(unsigned int num_lines, unsigned int assoc)
@@ -30,38 +31,22 @@ SetCache::SetCache(unsigned int num_lines, unsigned int assoc)
    }
 }
 
-/* FIXME invalid vs not found */
 // Given the set and tag, return the cache lines state
 cacheState SetCache::findTag(uint64_t set,
                               uint64_t tag) const
 {
 
-	/*
-	std::set<cacheLine> daBlock = sets[set];
-
-	for (auto it = daBlock.begin(); it != daBlock.end(); it++)
-	{
-		if (tag == it->tag)
-			return MOD;
-	}
-	enum cacheState {MOD,OWN,EXC,SHA,INV};
-
-
-	*/
-
-	// O(1) find
+	// lookup in the map
 	if (lruMaps[set].find(tag) != lruMaps[set].end())
 	{
 		//value found
 		return OWN;
 	}
 
-
 	return INV;
 
 }
 
-/* FIXME invalid vs not found */
 // Changes the cache line specificed by "set" and "tag" to "state"
 void SetCache::changeState(uint64_t set, uint64_t tag,
                               cacheState state)
@@ -117,7 +102,6 @@ bool SetCache::checkWriteback(uint64_t set,
    return (evict.state == MOD || evict.state == OWN);
 }
 
-// FIXME: invalid vs not found
 // Insert a new cache line by popping the least recently used line
 // and pushing the new line to the back (most recently used)
 void SetCache::insertLine(uint64_t set, uint64_t tag,
@@ -128,6 +112,7 @@ void SetCache::insertLine(uint64_t set, uint64_t tag,
 	// 3. value evicted is the key of the map and delete that entry in map O(1)
 	// 4. insert new key (ie tag) in the map (same as tag at beining of list)
 	// 5. make sure new key points to location of the iterator honestly
+	// 6. update sets
 
 	cacheLine newRow, temp;
 	newRow.tag = tag;
@@ -152,25 +137,13 @@ void SetCache::insertLine(uint64_t set, uint64_t tag,
 		lruMaps[set].erase(evicted_tag); 
 		lruLists[set].erase(it->second); 
 		lruMaps[set].insert(make_pair(tag, lruLists[set].begin())); 
-
-
-		/*
-		std::cout << rand << std::endl;
-		// Advance the iterator by 2 positions,
-		auto it = lruLists[set].begin();
-		std::advance(it, rand);
 		
+		temp.tag = evicted_tag;
 		
-		lruLists[set].erase(it);
-		//lruLists[set].pop_back();
+		// update sets
+		sets[set].erase(temp);
+		sets[set].insert(newRow);
 
-		// step 3
-		lruMaps[set].erase(*it);
-
-		// step 4 and step 5
-		// list.begin() returns iterator to front element (which is what we want)
-		lruMaps[set].insert(make_pair(tag, lruLists[set].begin()));
-		*/
 	}
 	else
 	{
@@ -188,32 +161,13 @@ void SetCache::insertLine(uint64_t set, uint64_t tag,
 		// list.begin() returns iterator to front element (which is what we want)
 		lruMaps[set].insert(make_pair(tag, lruLists[set].begin()));
 
-
-
 		temp.tag = key;
 		
-		// update sets
+		// step 6 update sets
 		sets[set].erase(temp);
 		sets[set].insert(newRow);
 
 	}
 	
-	
-	//UPDATE THE CACHELINE (this shit not O(1) maybe ask TA wtf they wanted seems like unneccessary)
-
-	/*
-	//delete in set
-	auto index_to_remove = sets[set].begin();
-	std::advance(index_to_remove, key);
-	sets[set].erase(index_to_remove);
-	
-
-	//append to set
-	cacheLine newLine;
-  newLine.tag = tag;
-  newLine.state = state;
-  sets[set].insert(newLine);
-
-	*/
 }
 
