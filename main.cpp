@@ -7,8 +7,23 @@
 
 using namespace std;
 
-int main()
+int doRandomReplacement = 0;
+int main(int argc, char** argv)
 {
+
+	 doRandomReplacement = atoi(argv[1]);
+
+	 if (doRandomReplacement)
+	 {
+		 std::cout << "Random Replacement" << std::endl;
+		 std::cout << "==================" << std::endl;
+	 }
+	 else
+	 {
+		 std::cout << "LRU Replacement" << std::endl;
+		 std::cout << "===============" << std::endl;
+	 }
+
    // tid_map is used to inform the simulator how
    // thread ids map to NUMA/cache domains. Using
    // the tid as an index gives the NUMA domain.
@@ -59,6 +74,7 @@ int main()
    cout << "Remote writes: " << sys.stats.remote_writes << endl;
    cout << "Other-cache reads: " << sys.stats.othercache_reads << endl;
    cout << "Compulsory Misses: " << sys.stats.compulsory << endl;
+	 cout << std::endl;
 
    infile.close();
 

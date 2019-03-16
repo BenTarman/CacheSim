@@ -9,7 +9,7 @@
 
 
 //parameter to use random replacement or not
-bool useRandomReplacement = true;
+extern int doRandomReplacement;
 
 SetCache::SetCache(unsigned int num_lines, unsigned int assoc)
 {
@@ -117,7 +117,7 @@ void SetCache::insertLine(uint64_t set, uint64_t tag,
 	cacheLine newRow, temp;
 	newRow.tag = tag;
 	newRow.state = state;
-	if (useRandomReplacement)
+	if (doRandomReplacement)
 	{
 		// step 1
 		lruLists[set].push_front(tag);
